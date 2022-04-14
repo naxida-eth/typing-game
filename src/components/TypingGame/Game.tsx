@@ -7,8 +7,17 @@ import { Card, Input, InputProps, Space, Button, InputRef } from 'antd';
 import { constSecond, constTitle } from "../typing";
 import axios from "axios";
 
-const Game: FC = () => {
-    const [title, setTitle] = useState<string>(constTitle);
+interface IProps{
+    title:string,
+    setTitle:Function,
+    checkTitle:Function,
+}
+
+const Game: FC<IProps> = ({
+    title,
+    setTitle,
+    checkTitle
+}) => {
     const [second, setSecond] = useState<number>(constSecond);
     const [start, setStart] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
@@ -17,16 +26,16 @@ const Game: FC = () => {
 
     const onEnter: InputProps['onPressEnter'] = (e) => {
         const target = e.target as HTMLInputElement;
-        console.log(target.value)
+        checkTitle(target.value)
     }
 
-    const gameStart = ()=>{
-        if(!start) getTitle();
+    const gameStart = () => {
+        if (!start) getTitle();
         setStart(!start)
     }
 
-    const getTitle=async ()=>{
-        const res =  await axios.get('/titles');
+    const getTitle = async () => {
+        const res = await axios.get('/titles');
         setTitle(res.data)
     }
 

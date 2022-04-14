@@ -1,5 +1,5 @@
 
-export const constSecond = 5 as const
+export const constSecond = 30 as const
 
 export const constTitle = 'Typing Game' as const
 
