@@ -20,13 +20,12 @@ export interface ITypingContext {
 }
 
 export const TypingContext = createContext<ITypingContext>({} as ITypingContext);
-const { Provider } = TypingContext
 
 const Typing: FC = () => {
     const [state, dispatch] = useReducer(wordReducer, initializerArg);
 
     return (
-        <Provider value={{ words: state, dispatch }}>
+        <TypingContext.Provider value={{ words: state, dispatch }}>
             <Row style={{ height: '100vh' }}>
                 <Col style={{ ...baseStyle, backgroundColor: '#121113', display: 'flex', justifyContent: 'center', alignItems: 'center' }} flex={2}>
                     <Game></Game>
@@ -35,7 +34,7 @@ const Typing: FC = () => {
                     <Answer></Answer>
                 </Col>
             </Row>
-        </Provider>
+        </TypingContext.Provider>
     )
 }
 

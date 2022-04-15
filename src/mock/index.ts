@@ -18,10 +18,6 @@ Mock.Random.extend({
     }
 })
 
-console.log(Mock.mock('/titles','get',()=>{
+export default Mock.mock('/titles','get',()=>{
     return Mock.Random.title();
-}))
-
-// export default Mock.mock('http://localhost:3000/titles','get',()=>{
-//     return Mock.Random.title();
-// })
+})
