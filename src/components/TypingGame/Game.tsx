@@ -1,50 +1,58 @@
-import { FC, useEffect, useState, useRef, RefObject } from "react"
-
+import { FC, useEffect, useState, useRef, RefObject, useCallback, useContext } from "react"
+import axios from "axios";
+import { Card, Input, InputProps, Space, Button, InputRef } from 'antd';
 import Timer from "./Timer";
 
-import { Card, Input, InputProps, Space, Button, InputRef } from 'antd';
+import { TypingContext } from "../../pages/TypingGame";
+import { ActionType, ICheckWord } from "./typings";
 
-import { constSecond, constTitle } from "../typing";
-import axios from "axios";
+const constTitle = 'Typing Game'
 
-interface IProps{
-    title:string,
-    setTitle:Function,
-    checkTitle:Function,
+const constSecond = 30
+
+interface IProps {
 }
 
 const Game: FC<IProps> = ({
-    title,
-    setTitle,
-    checkTitle
 }) => {
+    const [title, setTitle] = useState<string>(constTitle);
     const [second, setSecond] = useState<number>(constSecond);
     const [start, setStart] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
+    const [word,setWord] = useState<string>('');
 
     const inputRef = useRef() as RefObject<InputRef>;
 
-    const onEnter: InputProps['onPressEnter'] = (e) => {
-        const target = e.target as HTMLInputElement;
-        checkTitle(target.value)
+    const { words, dispatch } = useContext(TypingContext)
+
+    const onEnter: InputProps['onPressEnter'] = () => {
+        const payload: ICheckWord = {
+            wordItem: {
+                id: words.length + 1,
+                word: title,
+                correct: false,
+            },
+            word: word.trim(),
+        }
+        dispatch({ type: ActionType.CHECK_WORD, payload })
+        setWord('')
+        getTitle();
     }
 
-    const gameStart = () => {
-        if (!start) getTitle();
+    const gameStart = useCallback(() => {
+        if (!start) {
+            getTitle();
+        };
         setStart(!start)
-    }
+    }, [start])
 
-    const getTitle = async () => {
-        const res = await axios.get('/titles');
-        setTitle(res.data)
-    }
+    const getTitle = useCallback(async () => {
+        const { data } = await axios.get('/titles');
+        setTitle(data);
+    }, [])
 
     useEffect(() => {
         if (second <= constSecond && start && second !== 0) {
-            inputRef.current!.focus({
-                cursor: 'start',
-            });
-
             setTimeout(() => {
                 setSecond(second - 1)
             }, 1000)
@@ -63,6 +71,14 @@ const Game: FC<IProps> = ({
         }, 1000)
     }, [])
 
+    useEffect(() => {
+        console.log(start)
+        if (start)
+            inputRef.current!.focus({
+                cursor: 'start',
+            });
+    }, [start])
+
     return (
         <>
             <Card
@@ -77,6 +93,8 @@ const Game: FC<IProps> = ({
                         ref={inputRef}
                         style={{ width: '100%' }}
                         disabled={!start}
+                        value={word}
+                        onChange={e=>setWord(e.target.value)}
                         onPressEnter={onEnter}
                     />
                     <Button type='primary' onClick={gameStart}>{!start ? 'Start' : 'Restart'}</Button>

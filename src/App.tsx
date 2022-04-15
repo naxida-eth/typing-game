@@ -1,11 +1,9 @@
 
-import Typing from './components/TypingGame';
+import TypingGame from './pages/TypingGame';
 
 function App() {
   return (
-    <div className="App">
-      <Typing></Typing>
-    </div>
+    <TypingGame></TypingGame>
   );
 }
 

@@ -1,7 +1,7 @@
-import { FC} from "react"
+import { FC } from "react"
 
-interface IProps{
-    second:number
+interface IProps {
+    second: number
 }
 
 const Timer: FC<IProps> = ({
@@ -10,14 +10,14 @@ const Timer: FC<IProps> = ({
     return (
         <>
             <div style={{
-                display:'flex',
-                alignItems:'center',
-                justifyContent:'center',
-                width:100,
-                height:100,
-                borderRadius:'50%',
-                border:'2px solid #753049',
-                fontSize:34,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 100,
+                height: 100,
+                borderRadius: '50%',
+                border: '2px solid #753049',
+                fontSize: 34,
             }}>
                 {second}
             </div>
