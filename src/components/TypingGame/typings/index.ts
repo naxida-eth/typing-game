@@ -5,7 +5,8 @@ export interface IWord {
 }
 
 export enum ActionType {
-    CHECK_WORD='checkWord'
+    CHECK_WORD='checkWord',
+    CLEAR_WORD='clearWord'
 }
 
 export interface ICheckWord{
@@ -15,5 +16,5 @@ export interface ICheckWord{
 
 export interface IAction {
     type: ActionType
-    payload: IWord | ICheckWord
+    payload?: IWord | ICheckWord
 }

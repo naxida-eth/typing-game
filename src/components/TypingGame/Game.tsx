@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, useRef, RefObject, useCallback, useContext } from "react"
+import { FC, useEffect, useState, useRef, RefObject, useCallback, useContext, useDeferredValue } from "react"
 import axios from "axios";
 import { Card, Input, InputProps, Space, Button, InputRef } from 'antd';
 import Timer from "./Timer";
@@ -10,6 +10,8 @@ const constTitle = 'Typing Game'
 
 const constSecond = 30
 
+let timer: NodeJS.Timeout;
+
 interface IProps {
 }
 
@@ -19,11 +21,15 @@ const Game: FC<IProps> = ({
     const [second, setSecond] = useState<number>(constSecond);
     const [start, setStart] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
-    const [word,setWord] = useState<string>('');
+    const [word, setWord] = useState<string>('');
+
+    const deferredStart = useDeferredValue(start);
+    const deferredSecond = useDeferredValue(second);
 
     const inputRef = useRef() as RefObject<InputRef>;
 
-    const { words, dispatch } = useContext(TypingContext)
+    const { words, dispatch } = useContext(TypingContext);
+
 
     const onEnter: InputProps['onPressEnter'] = () => {
         const payload: ICheckWord = {
@@ -40,11 +46,11 @@ const Game: FC<IProps> = ({
     }
 
     const gameStart = useCallback(() => {
-        if (!start) {
+        if (!deferredStart) {
             getTitle();
         };
-        setStart(!start)
-    }, [start])
+        setStart(!deferredStart)
+    }, [deferredStart])
 
     const getTitle = useCallback(async () => {
         const { data } = await axios.get('/titles');
@@ -52,18 +58,20 @@ const Game: FC<IProps> = ({
     }, [])
 
     useEffect(() => {
-        if (second <= constSecond && start && second !== 0) {
-            setTimeout(() => {
-                setSecond(second - 1)
+        if (deferredSecond <= constSecond && deferredStart && deferredSecond !== 0) {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(() => {
+                setSecond(deferredSecond - 1)
+                console.log(deferredSecond)
             }, 1000)
-        } else if (second <= 0) {
+        } else if (deferredSecond <= 0) {
             setSecond(constSecond);
             setStart(false)
-        } else if (!start) {
+        } else if (!deferredStart) {
             setTitle(constTitle)
             setSecond(constSecond);
         }
-    }, [second, start])
+    }, [deferredSecond, deferredStart])
 
     useEffect(() => {
         setTimeout(() => {
@@ -72,12 +80,16 @@ const Game: FC<IProps> = ({
     }, [])
 
     useEffect(() => {
-        console.log(start)
-        if (start)
+        console.log(deferredStart)
+        if (deferredStart) {
             inputRef.current!.focus({
                 cursor: 'start',
             });
-    }, [start])
+        } else {
+            clearTimeout(timer);
+            dispatch({ type: ActionType.CLEAR_WORD })
+        }
+    }, [deferredStart])
 
     return (
         <>
@@ -88,16 +100,16 @@ const Game: FC<IProps> = ({
                 bodyStyle={{ backgroundColor: '#26304A' }}
                 loading={loading}>
                 <Space direction="vertical" size="middle" style={{ padding: 0, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <Timer second={second}></Timer>
+                    <Timer second={deferredSecond}></Timer>
                     <Input
                         ref={inputRef}
                         style={{ width: '100%' }}
-                        disabled={!start}
+                        disabled={!deferredStart}
                         value={word}
-                        onChange={e=>setWord(e.target.value)}
+                        onChange={e => setWord(e.target.value)}
                         onPressEnter={onEnter}
                     />
-                    <Button type='primary' onClick={gameStart}>{!start ? 'Start' : 'Restart'}</Button>
+                    <Button type='primary' onClick={gameStart}>{!deferredStart ? 'Start' : 'Restart'}</Button>
                 </Space>
             </Card>
         </>
